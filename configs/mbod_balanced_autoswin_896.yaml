@@ -1,0 +1,42 @@
+# MBOD Balanced Dataset - AutoSwin with QFormer and PTuning
+# Image size: 896x896
+# Model: AutoSwin (pretrained) + QFormer + PTuning
+
+PROJECT_NAME: "mbod_balanced_autoswin"
+GROUP_NAME: "qformer_ptuning_896"
+
+# Architecture
+FOUNDATION_MODEL: "biomedclip"  # or "medclip"
+SWIN_HEAD: True
+USE_QFORMER: True
+USE_PTUNING: True
+USE_DECODER: False
+USE_MULTILABEL: True
+USE_ORDINAL_CLASS: False
+
+# Data
+LABELS_KEY: "multilabel_stb"
+LABEL_SET: "RAND_MULTILABEL_STB"
+IMAGE_SIZE: 896
+# Paths relative to BIOMED_DATA_DIR (or absolute)
+DATA_PATH: "mbod_rand_balanced_896.h5"
+TEST_DATA_PATH: "mbod_rand_balanced_896.h5"
+SPLIT_FILE: ""
+SWIN_PRETRAINED_PATH: "/home/josh/checkpoints/pretrain-swin-v3-05-896.pth"
+
+# Training
+BATCH_SIZE: 4
+LEARNING_RATE: 5e-5
+EPOCHS: 2000
+NUM_FOLDS: 5
+FOUNDATION_MODEL_FROZEN_EPOCHS: 251
+SWIN_FROZEN_EPOCHS: 150
+LEARNING_RATE_DECAY_STEP_SIZE: 25
+LEARNING_RATE_DECAY_GAMMA: 0.5
+
+# Other
+OVERSAMPLE: False
+USE_AUTOCAST: False
+ALIGNMENT_LOSS_WEIGHT: 0
+FIDELITY_WEIGHT: -1
+CHECKPOINT_SAVE_DIR: "/mnt/data/home/josh/results/{project_name}-{group_name}/fold-all"

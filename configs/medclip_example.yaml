@@ -1,0 +1,44 @@
+# Sample MedCLIP Configuration
+# This config demonstrates how to use the MedCLIP foundation model instead of BiomedCLIP
+
+PROJECT_NAME: "medclip-test"
+GROUP_NAME: "medclip-vindr"
+
+# Foundation Model (new required field)
+# Options: 'biomedclip' or 'medclip'
+FOUNDATION_MODEL: "medclip"
+
+# Architecture
+SWIN_HEAD: True
+USE_QFORMER: True
+USE_PTUNING: True
+USE_DECODER: False
+USE_MULTILABEL: True
+USE_ORDINAL_CLASS: False
+
+# Data
+LABELS_KEY: "lab"
+LABEL_SET: "VINDR_BASIC"
+IMAGE_SIZE: 896
+# Note: MedCLIP internally uses 448px images, but you can still use larger
+# input images with the Swin downsampling head
+DATA_PATH: "vindr_{image_size}_lanczos_paperGlobal.h5"
+TEST_DATA_PATH: "vindr_{image_size}_lanczos_paperGlobal.h5"
+SPLIT_FILE: "vindr_stratified_split.json"
+SWIN_PRETRAINED_PATH: null
+
+# Training
+BATCH_SIZE: 1
+LEARNING_RATE: 5e-5
+EPOCHS: 150
+FOUNDATION_MODEL_FROZEN_EPOCHS: 251
+SWIN_FROZEN_EPOCHS: 0
+LEARNING_RATE_DECAY_STEP_SIZE: 25
+LEARNING_RATE_DECAY_GAMMA: 0.5
+
+# Other
+OVERSAMPLE: False
+USE_AUTOCAST: False
+ALIGNMENT_LOSS_WEIGHT: 0
+FIDELITY_WEIGHT: -1
+CHECKPOINT_SAVE_DIR: "medclip-{suffix}-{fold_number}"

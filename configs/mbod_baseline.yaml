@@ -1,0 +1,30 @@
+# BiomedCLIP baseline on MBOD (no Swin, no QFormer, no PTuning)
+# Usage: python main.py --config configs/mbod_baseline.yaml
+
+PROJECT_NAME: "swin-mbod"
+GROUP_NAME: "baseline"
+
+# Architecture — all off
+FOUNDATION_MODEL: "biomedclip"  # or "medclip"
+SWIN_HEAD: False
+USE_QFORMER: False
+USE_PTUNING: False
+USE_DECODER: False
+USE_MULTILABEL: True
+
+# Data
+LABELS_KEY: "multilabel_ptb"
+LABEL_SET: "MBOD_MULTILABEL_PTB"
+IMAGE_SIZE: 224
+DATA_PATH: "mbod_stb_multilabel_{image_size}.h5"
+TEST_DATA_PATH: "mbod_stb_multilabel_{image_size}.h5"
+SPLIT_FILE: "mbod_stratified_split_filt.json"
+
+# Training
+BATCH_SIZE: 2
+LEARNING_RATE: 5e-5
+EPOCHS: 150
+NUM_FOLDS: 10
+FOUNDATION_MODEL_FROZEN_EPOCHS: 251
+LEARNING_RATE_DECAY_STEP_SIZE: 25
+LEARNING_RATE_DECAY_GAMMA: 0.5

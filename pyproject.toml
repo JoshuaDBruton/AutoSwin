@@ -1,0 +1,31 @@
+[project]
+name = "autoswin"
+version = "0.1.0"
+description = "Learned Downsampling Improves Fine-tuning of Foundation Models for Radiographic Classification of Small Disease Signs"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GPL-3.0-or-later"}
+dependencies = [
+    "h5py",
+    "torch",
+    "torchvision",
+    "timm",
+    "open-clip-torch",
+    "pillow",
+    "pyyaml",
+    "scikit-learn",
+    "scikit-image",
+    "tqdm",
+    "matplotlib",
+    "wandb",
+    "torchxrayvision",
+    "peft",
+    "opencv-python>=4.12.0.88",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["autoswin"]

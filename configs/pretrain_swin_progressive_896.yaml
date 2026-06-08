@@ -1,0 +1,41 @@
+# Pretrain Swin adapter on VinDr with progressive layer-wise training
+# Usage: python pretrain_swin.py --config configs/pretrain_swin_progressive_896.yaml
+#
+# This config trains progressively:
+#   Phase 0: 50 epochs at exit_stage=0 (896->448 only), decoder 448->896
+#   Phase 1: 50 epochs at exit_stage=1 (448->224), freeze stage 0, decoder 224->448->896
+#   Phase 2: 50 epochs at exit_stage=2 (224->112), freeze stages 0-1, full decoder
+
+PROJECT_NAME: "pretrain-swin"
+CHECKPOINT_SAVE_DIR: "pretrain-swin-{suffix}-{image_size}"
+
+# Architecture
+FOUNDATION_MODEL: "biomedclip"
+SWIN_HEAD: True
+USE_QFORMER: False
+USE_PTUNING: False
+USE_DECODER: True
+
+# Swin architecture: 896 -> 448 -> 224 -> 112
+IMAGE_SIZE: 896
+SWIN_PATCH_SIZE: 2
+SWIN_EMBED_DIM: 48
+SWIN_DEPTHS: [2, 2, 2]
+SWIN_NUM_HEADS: [2, 4, 8]
+SWIN_WINDOW_SIZE: 4
+DECODER_DEPTH: 2
+DECODER_WINDOW_SIZE: 4
+
+# Progressive training phases
+# Each entry is epochs for that phase. Length determines number of phases.
+SWIN_PHASE_EPOCHS: [50, 50, 50]
+
+# Data
+DATA_PATH: "vindr_{image_size}_lanczos_paperGlobal.h5"
+SPLIT_FILE: "vindr_stratified_split.json"
+
+# Training
+BATCH_SIZE: 1
+LEARNING_RATE: 5e-5
+EPOCHS: 150
+FIDELITY_WEIGHT: 0.5

@@ -1,0 +1,138 @@
+# Label descriptions for all datasets / classification tasks.
+# Configs reference these by name via the LABEL_SET key.
+# e.g. LABEL_SET: "VINDR_BASIC"
+
+# --- Ordinal Profusion Scores (3 classes) ---
+ORDINAL_PROFUSION:
+  - "There is at least minimal parenchymal abnormality suggestive of pneumoconiosis."
+  - "There is moderate profusion of small opacities, indicating more frequent involvement."
+  - "There is advanced parenchymal involvement with confluent opacities."
+
+# --- Tuberculosis Binary Classification (2 classes) ---
+BINARY_TUBERCULOSIS:
+  - "This X-ray does not present Tuberculosis"
+  - "This X-ray contains signs of Tuberculosis"
+
+# --- Silicosis Binary Classification (2 classes) ---
+BINARY_SILICOSIS:
+  - "No sign of silicosis, pneumoconiosis negative"
+  - "Signs of silicosis, pneumoconiosis positive"
+
+# --- MBOD Multilabel (PTB - 5 classes) ---
+MBOD_MULTILABEL_PTB:
+  - "Profusion Score 1"
+  - "Profusion Score 2"
+  - "Profusion Score 3"
+  - "Tuberculosis"
+  - "No finding"
+
+# --- MBOD Multilabel (STB - 3 classes) ---
+MBOD_MULTILABEL_STB:
+  - "Silicosis"
+  - "Tuberculosis"
+  - "No finding"
+
+# --- Rand Mutual Multilabel (STB - 3 classes) ---
+RAND_MULTILABEL_STB:
+  - "Silicosis"
+  - "Tuberculosis"
+  - "No finding"
+
+# --- Label Set 1: Descriptive profusion ---
+LABEL_SET_1:
+  - "The lung fields are clear with no evidence of small rounded opacities."
+  - "There are a few small, rounded opacities visible in the upper lung zones, but these are sparse and do not obscure vascular markings."
+  - "Numerous small, rounded opacities are present throughout the upper and mid lung zones, with partial obscuration of normal vascular markings."
+  - "The lung fields demonstrate a high density of small, rounded opacities, with marked obscuration of normal lung markings."
+
+# --- Label Set 2: Radiographic profusion ---
+LABEL_SET_2:
+  - "There is no radiographic indication of parenchymal abnormality suggestive of pneumoconiosis."
+  - "The distribution of opacities is limited, with minimal involvement of the lung parenchyma."
+  - "The opacities are more frequent and evenly distributed, indicating moderate profusion consistent with pneumoconiosis."
+  - "The opacities are confluent in some areas, and there is clear evidence of advanced parenchymal involvement."
+
+# --- Label Set 3: Architectural profusion ---
+LABEL_SET_3:
+  - "The pulmonary architecture is preserved, and no interstitial changes are identified."
+  - "No significant distortion of lung architecture is observed, and there is no evidence of coalescence."
+  - "There is mild distortion of the lung parenchyma, but no large opacities or significant fibrosis are seen."
+  - "Architectural distortion is present, and early signs of progressive massive fibrosis may be considered."
+
+# --- Numeric Labels (4 classes) ---
+NUMERIC:
+  - "0"
+  - "1"
+  - "2"
+  - "3"
+
+# --- VinDr Label Names (28 classes) ---
+VINDR_BASIC:
+  - "Aortic enlargement"
+  - "Atelectasis"
+  - "Calcification"
+  - "Cardiomegaly"
+  - "Clavicle fracture"
+  - "Consolidation"
+  - "Edema"
+  - "Emphysema"
+  - "Enlarged PA"
+  - "ILD"
+  - "Infiltration"
+  - "Lung Opacity"
+  - "Lung cavity"
+  - "Lung cyst"
+  - "Mediastinal shift"
+  - "Nodule/Mass"
+  - "Pleural effusion"
+  - "Pleural thickening"
+  - "Pneumothorax"
+  - "Pulmonary fibrosis"
+  - "Rib fracture"
+  - "Other lesion"
+  - "COPD"
+  - "Lung tumor"
+  - "Pneumonia"
+  - "Tuberculosis"
+  - "Other diseases"
+  - "No finding"
+
+# --- VinDr Descriptive Labels (28 classes) ---
+VINDR_DESC:
+  - "A chest X-ray showing an enlarged aorta, indicating aortic enlargement."
+  - "A chest X-ray with evidence of lung collapse or incomplete expansion, known as atelectasis."
+  - "A chest X-ray displaying abnormal calcium deposits in the chest, indicating calcification."
+  - "A chest X-ray showing an enlarged heart, a condition called cardiomegaly."
+  - "A chest X-ray revealing a broken clavicle bone, indicating a clavicle fracture."
+  - "A chest X-ray with areas of increased lung density, suggesting lung consolidation."
+  - "A chest X-ray showing fluid accumulation in the lungs, consistent with pulmonary edema."
+  - "A chest X-ray with signs of overinflated lungs and reduced lung markings, characteristic of emphysema."
+  - "A chest X-ray showing an enlarged pulmonary artery, indicating pulmonary artery enlargement."
+  - "A chest X-ray with diffuse interstitial markings, consistent with interstitial lung disease (ILD)."
+  - "A chest X-ray displaying patchy or diffuse opacities in the lungs, suggesting infiltration."
+  - "A chest X-ray with abnormal opaque areas in the lung fields, indicating lung opacity."
+  - "A chest X-ray showing a hollow, air-filled space within the lung, known as a lung cavity."
+  - "A chest X-ray revealing a round, thin-walled air-filled space in the lung, indicating a lung cyst."
+  - "A chest X-ray with displacement of the mediastinum to one side, indicating mediastinal shift."
+  - "A chest X-ray showing a distinct round nodule or mass in the lung."
+  - "A chest X-ray with fluid accumulation in the pleural space, consistent with pleural effusion."
+  - "A chest X-ray showing thickened pleural lining, indicating pleural thickening."
+  - "A chest X-ray revealing air in the pleural space, causing lung collapse, known as pneumothorax."
+  - "A chest X-ray with reticular or honeycomb patterns in the lungs, consistent with pulmonary fibrosis."
+  - "A chest X-ray showing a break or crack in one of the ribs, indicating a rib fracture."
+  - "A chest X-ray displaying an abnormal lesion in the chest that does not fit other categories."
+  - "A chest X-ray with signs of chronic obstructive pulmonary disease, such as hyperinflated lungs and flattened diaphragm."
+  - "A chest X-ray showing a suspicious mass or tumor in the lung."
+  - "A chest X-ray with localized or diffuse lung opacities, consistent with pneumonia."
+  - "A chest X-ray showing features suggestive of pulmonary tuberculosis, such as upper lobe opacities or cavitation."
+  - "A chest X-ray with abnormalities indicating other diseases not specified in the main categories."
+  - "A normal chest X-ray with no abnormal findings."
+
+# --- VinDr Global (6 classes) ---
+VINDR_GLOBAL:
+  - "Pleural effusion"
+  - "Lung tumor"
+  - "Pneumonia"
+  - "Tuberculosis"
+  - "Other diseases"
+  - "No finding"

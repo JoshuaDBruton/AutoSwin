@@ -1,0 +1,41 @@
+# Pretrain Swin adapter on VinDr
+# Usage: python pretrain_swin.py --config configs/pretrain_swin_config.yaml
+#
+# Default architecture: 896 -> 448 -> 224 -> 112 (patch_size=2, depths=[2,2,2])
+# For old 896->224->112 (patch_size=4, depths=[2,2]) set:
+#   SWIN_PATCH_SIZE: 4
+#   SWIN_DEPTHS: [2, 2]
+#   SWIN_NUM_HEADS: [2, 4]
+
+PROJECT_NAME: "pretrain-swin"
+CHECKPOINT_SAVE_DIR: "pretrain-swin-{suffix}-{image_size}"
+
+# Architecture
+FOUNDATION_MODEL: "biomedclip"
+SWIN_HEAD: True
+USE_QFORMER: False
+USE_PTUNING: False
+USE_DECODER: False
+
+# Swin architecture (default for 896 -> 448 -> 224 -> 112)
+IMAGE_SIZE: 896
+SWIN_PATCH_SIZE: 2
+SWIN_EMBED_DIM: 48
+SWIN_DEPTHS: [2, 2, 2]
+SWIN_NUM_HEADS: [2, 4, 8]
+SWIN_WINDOW_SIZE: 4
+DECODER_DEPTH: 2
+DECODER_WINDOW_SIZE: 4
+
+# Single-phase mode (use SWIN_PHASE_EPOCHS for progressive training)
+SWIN_EXIT_STAGE: -1  # -1 = use all stages
+
+# Data
+DATA_PATH: "vindr_{image_size}_lanczos_paperGlobal.h5"
+SPLIT_FILE: "vindr_stratified_split.json"
+
+# Training
+BATCH_SIZE: 1
+LEARNING_RATE: 5e-5
+EPOCHS: 100
+FIDELITY_WEIGHT: 1.0
