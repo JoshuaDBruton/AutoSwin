@@ -46,6 +46,7 @@ def main():
     def model_init_fn():
         model, preprocess, _ = create_combined_model(
             tokenizer=None,  # Will be created internally based on foundation model
+            num_classes=len(cfg.label_descriptions) + int(cfg.use_ordinal_class),
             foundation_model_key=cfg.foundation_model,
             swin_pretrained_path=cfg.swin_pretrained_path,
             image_size=cfg.image_size,
@@ -77,6 +78,7 @@ def main():
     
     # Initialize model once to get the tokenizer
     model, preprocess, tokenizer = model_init_fn()
+    del model, preprocess
 
     # --- Run ---
     mccv = MonteCarloCrossValidator(

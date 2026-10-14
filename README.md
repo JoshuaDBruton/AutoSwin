@@ -197,6 +197,29 @@ python scripts/visualise_downsamples.py \
 
 ## Datasets
 
+### Frontiers v1.1 baselines and smoke tests
+
+BiomedCLIP now loads `microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224`.
+Best checkpoints are selected from epoch 0 by validation **macro-averaged ROC AUC**
+(classes without both outcomes are excluded), then reloaded for test evaluation.
+`final-*` retains the last epoch; `best-foldN` is the selected checkpoint.
+Zero-based fold N always uses seed `2026 + N`, even with a fixed stratified split.
+Fixed split membership is preserved: these are repeated seeded runs, not new partitions.
+
+The RAD-DINO baseline adapts the CLS + linear classifier in `../rad-dino/run.py`,
+with its pinned Microsoft model revision, Lanczos preprocessing and end-to-end training.
+It is self-contained: the sibling directory is not required at runtime.
+Use `configs/raddino_mbod.yaml` with either CV entry point. It enables AMP,
+batch size 1 and encoder gradient checkpointing for a 12 GB GPU.
+
+```bash
+uv run python scripts/smoke_test.py --model biomedclip
+uv run python scripts/smoke_test.py --model raddino
+uv run python scripts/main.py --config configs/raddino_mbod.yaml --no-wandb
+```
+
+Smoke tests download pretrained weights and run a synthetic optimizer step without data.
+
 The experiments in the paper use two primary datasets:
 
 - **MBOD**: South African Medical Bureau of Occupational Diseases dataset (private, 1,821 CXRs after quality filtering). Focused on silicosis and tuberculosis, with ILO (International Classification of Radiographs of Pneumoconioses) profusion scores.

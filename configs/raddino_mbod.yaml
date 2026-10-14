@@ -1,0 +1,16 @@
+# RAD-DINO end-to-end baseline; batch 1 + AMP + checkpointing for 12 GB GPUs.
+PROJECT_NAME: frontiers-mbod
+GROUP_NAME: raddino
+FOUNDATION_MODEL: raddino
+USE_MULTILABEL: True
+USE_AUTOCAST: True
+LABELS_KEY: multilabel_ptb
+LABEL_SET: MBOD_MULTILABEL_PTB
+IMAGE_SIZE: 896
+DATA_PATH: mbod_stb_multilabel_{image_size}_same.h5
+TEST_DATA_PATH: mbod_stb_multilabel_{image_size}_same.h5
+SPLIT_FILE: mbod_stratified_split_filt.json
+BATCH_SIZE: 1
+LEARNING_RATE: 0.00001
+EPOCHS: 20
+NUM_FOLDS: 5

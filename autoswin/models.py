@@ -13,7 +13,7 @@ from autoswin.ptuned_text_encoder import PEFTTextEncoder
 # Foundation model configurations
 FOUNDATION_MODELS = {
     "biomedclip": {
-        "model_name": "hf-hub:mgbam/OpenCLIP-BiomedCLIP-Finetuned",
+        "model_name": "hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224",
         "embed_dim": 512,
         "image_size": 224,
     },
@@ -550,6 +550,7 @@ def create_combined_model(
     decoder_window_size=4,
     pretrained_path=None,  # deprecated, kept for compatibility
     model_name=None,  # deprecated, kept for compatibility
+    num_classes=None,
 ):
     """Create combined model with specified foundation model.
 
@@ -575,6 +576,14 @@ def create_combined_model(
     Returns:
         combined_model, preprocess function
     """
+    if foundation_model_key == "raddino":
+        if use_swin or use_qformer or use_ptuning or use_decoder:
+            raise ValueError("RAD-DINO baseline requires Swin, Q-Former, P-Tuning and decoder disabled")
+        if num_classes is None:
+            raise ValueError("RAD-DINO requires num_classes")
+        from autoswin.raddino import create_raddino
+        return create_raddino(num_classes)
+
     # Get foundation model configuration
     model_config = get_foundation_model_config(foundation_model_key)
     model_name_or_path = model_config["model_name"]

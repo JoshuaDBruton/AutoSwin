@@ -142,7 +142,7 @@ class ExperimentConfig:
             raise ValueError("use_ordinal_class and use_multilabel are incompatible.")
         
         # Validate foundation model
-        valid_models = ["biomedclip", "medclip"]
+        valid_models = ["biomedclip", "medclip", "raddino"]
         if not self.foundation_model:
             raise ValueError(
                 "You must choose a foundation model ('medclip', 'biomedclip') in your config."

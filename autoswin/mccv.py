@@ -37,7 +37,7 @@ from autoswin.metrics import (
     multiclass_specificity_at_sensitivity,
     specificity_at_sensitivity,
 )
-from autoswin.multilabel_metrics import calculate_per_class_metrics
+from autoswin.multilabel_metrics import calculate_per_class_metrics, macro_auc
 from autoswin.utils import (
     create_tsne_plot,
     ordinal_preds_to_class,
@@ -51,6 +51,20 @@ CRITERION = torch.nn.MSELoss()
 RECON_WEIGHT = 0.2
 RECON_WEIGHT_FACT = 0.05
 RECON_WEIGHT_SCHED_EPOCH = 25
+
+
+def seed_fold(fold):
+    """Seed model initialization and training, including fixed-split experiments."""
+    if fold < 0:
+        raise ValueError("Fold numbers must be zero-based and non-negative")
+    seed = 2026 + fold
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    return seed
 
 
 class MonteCarloCrossValidator:
@@ -284,6 +298,12 @@ class MonteCarloCrossValidator:
         # Multilabel per-class metrics
         ml_metrics_dict = None
         average_auc = None
+        if not self.cfg.use_multilabel:
+            if self.cfg.use_ordinal_class:
+                targets = to_ordinal_labels(torch.as_tensor(all_gt), num_classes=self.num_classes).numpy()
+            else:
+                targets = np.eye(all_probs.shape[1])[all_gt.astype(int)]
+            average_auc = macro_auc(targets, all_probs)
         if self.cfg.use_multilabel:
             ml_metrics_dict, average_auc = calculate_per_class_metrics(
                 global_confusion,
@@ -359,10 +379,10 @@ class MonteCarloCrossValidator:
     # ------------------------------------------------------------------
 
     def train(self, train_split=None, iteration=None, start_epoch=0) -> EvalResult:
-        peak_validation_spec = 0
-        start_checkpoint_saves = 50
+        peak_validation_auc = -float("inf")
+        best_path = self.exp.checkpoints_dir / f"best-fold{iteration}.pth"
         patience = 1000
-        min_delta = 0.001
+        min_delta = 0.0
         epochs_without_improvement = 0
 
         train_loader, val_loader, test_loader = self._get_dataloaders(train_split, iteration)
@@ -499,32 +519,31 @@ class MonteCarloCrossValidator:
             plt.close(val_result.confusion_fig)
 
             # --- Checkpointing ---
-            if epoch > start_checkpoint_saves:
-                if val_result.specificity > peak_validation_spec + min_delta:
-                    peak_validation_spec = val_result.specificity
+            if val_result.average_auc is not None and np.isfinite(val_result.average_auc):
+                if val_result.average_auc > peak_validation_auc + min_delta:
+                    peak_validation_auc = val_result.average_auc
                     epochs_without_improvement = 0
                     self.exp.save_checkpoint(
                         self.model.state_dict(),
-                        tag=f"best-epoch{epoch}-spec{val_result.specificity:.4f}",
+                        tag=f"best-fold{iteration}",
                     )
                 else:
                     epochs_without_improvement += 1
                     if epochs_without_improvement >= patience:
                         print(f"Early stopping triggered after {epoch + 1} epochs")
                         break
-            elif val_result.specificity > peak_validation_spec:
-                peak_validation_spec = val_result.specificity
 
             # Save latest checkpoint (overwrite previous)
             self.exp.remove_checkpoints("latest")
             self.exp.save_checkpoint(self.model.state_dict(), tag=f"latest-{epoch}")
 
-        # --- Test evaluation ---
-        test_result = self.evaluate(test_loader, epoch, iteration, prefix="test_")
-
         # Save final model
         tag = f"final-fold{iteration}" if iteration is not None else "final"
         self.exp.save_checkpoint(self.model.state_dict(), tag=tag)
+        if not best_path.exists():
+            raise RuntimeError("No finite validation macro-AUC: cannot select a best checkpoint")
+        self.model.load_state_dict(torch.load(best_path, map_location=self.device, weights_only=True))
+        test_result = self.evaluate(test_loader, epoch, iteration, prefix="test_")
         print("Training complete. Model saved.")
 
         return test_result
@@ -537,11 +556,13 @@ class MonteCarloCrossValidator:
         accuracies = []
         sensitivities = []
         specificities = []
+        aucs = []
 
         import wandb as _wandb
         group_name = f"local-{self.cfg.checkpoint_save_dir}-{suffix}" + _wandb.util.generate_id() if self.wb.enabled else f"local-{suffix}"
 
         for i in range(k):
+            seed = seed_fold(i)
             self.dpmodel, self.preprocess = self.model_init_func()
             if torch.cuda.device_count() > 1:
                 self.dpmodel = torch.nn.DataParallel(self.dpmodel)
@@ -567,6 +588,7 @@ class MonteCarloCrossValidator:
                     "batch_size": self.cfg.batch_size,
                     "epochs": self.cfg.epochs,
                     "fold": i,
+                    "seed": seed,
                     "ordinal_class": self.cfg.use_ordinal_class,
                     "foundation_model": self.cfg.foundation_model,
                     "save_directory": self.exp.dir.as_posix(),
@@ -577,6 +599,7 @@ class MonteCarloCrossValidator:
             accuracies.append(test_result.accuracy)
             sensitivities.append(test_result.sensitivity)
             specificities.append(test_result.specificity)
+            aucs.append(test_result.average_auc)
 
             # Log final test metrics
             self._log_eval_metrics("test_", epoch=0, fold=i, result=test_result)
@@ -609,6 +632,8 @@ class MonteCarloCrossValidator:
             per_fold_accuracy=accuracies,
             per_fold_sensitivity=sensitivities,
             per_fold_specificity=specificities,
+            avg_macro_auc=float(np.mean(aucs)),
+            per_fold_macro_auc=aucs,
         )
 
         return avg_accuracy, avg_sensitivity, avg_specificity
@@ -618,6 +643,7 @@ class MonteCarloCrossValidator:
     # ------------------------------------------------------------------
 
     def run_fold(self, fold_number: int, group_name: str):
+        seed = seed_fold(fold_number)
         self.dpmodel, self.preprocess = self.model_init_func()
         if torch.cuda.device_count() > 1:
             self.dpmodel = torch.nn.DataParallel(self.dpmodel)
@@ -657,6 +683,7 @@ class MonteCarloCrossValidator:
                 "batch_size": self.cfg.batch_size,
                 "epochs": self.cfg.epochs,
                 "fold": fold_number,
+                "seed": seed,
                 "ordinal_class": self.cfg.use_ordinal_class,
                 "foundation_model": self.cfg.foundation_model,
                 "save_directory": self.exp.dir.as_posix(),

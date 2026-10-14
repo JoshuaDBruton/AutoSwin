@@ -1,4 +1,12 @@
 from sklearn.metrics import roc_auc_score
+import numpy as np
+
+
+def macro_auc(y_true, y_prob):
+    """Unweighted mean across classes with both positive and negative examples."""
+    scores = [roc_auc_score(y_true[:, i], y_prob[:, i])
+              for i in range(y_true.shape[1]) if len(np.unique(y_true[:, i])) == 2]
+    return float(np.mean(scores)) if scores else float("nan")
 
 
 def calculate_per_class_metrics(confusion_matrix, prefix, y_true, y_prob, class_names=None):
@@ -26,7 +34,8 @@ def calculate_per_class_metrics(confusion_matrix, prefix, y_true, y_prob, class_
         f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
         accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
         support = tp + fn  # actual positives
-        auc = roc_auc_score(y_true[:, i], y_prob[:, i])
+        auc = (roc_auc_score(y_true[:, i], y_prob[:, i])
+               if len(np.unique(y_true[:, i])) == 2 else float("nan"))
 
         # Log individual class metrics
         metrics_dict.update({
@@ -43,8 +52,8 @@ def calculate_per_class_metrics(confusion_matrix, prefix, y_true, y_prob, class_
             f"{prefix}tn/{class_name}": int(tn)
         })
 
-        total_auc += auc
-        total_classes += 1
+        if np.isfinite(auc):
+            total_auc += auc
+            total_classes += 1
 
-    return metrics_dict, (total_auc/total_classes)
-
+    return metrics_dict, (total_auc / total_classes if total_classes else float("nan"))

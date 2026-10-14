@@ -95,8 +95,7 @@ def plot_average_images_per_label(dataloader, label_descriptions, model, device)
 def plot_random_images(
     dataloader, model, device, num_images=4, seed=42
 ):
-    random.seed(seed)
-    selected_indices = sorted(random.sample(range(len(dataloader.dataset)), num_images))
+    selected_indices = sorted(random.Random(seed).sample(range(len(dataloader.dataset)), num_images))
 
     selected_images = []
 
